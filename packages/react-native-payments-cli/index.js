@@ -89,7 +89,7 @@ function interactiveGetUserProjectPath(maybeUserProject) {
 }
 
 function getPackagePath(packageName) {
-  return path.resolve(__dirname, `../${packageName}/package.json`);
+  return path.resolve(__dirname, `../../${packageName}/package.json`);
 }
 function getPackageConfig(packageName) {
   const config = require(getPackagePath(packageName));
