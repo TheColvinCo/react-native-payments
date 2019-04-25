@@ -1,6 +1,6 @@
 {
-  "name": "@thecolvinco/react-native-payments",
-  "version": "1.0.2",
+  "name": "thecolvinco_react-native-payments",
+  "version": "1.0.0",
   "scripts": {
     "run:packager": "cd examples/native && yarn run:packager",
     "run:ios": "cd examples/native && yarn run:ios",
