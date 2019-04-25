@@ -1,12 +1,12 @@
 {
-  "name": "@thecolvinco/react-native-payments-cli",
-  "version": "0.4.4",
+  "name": "thecolvinco_react-native-payments-cli",
+  "version": "0.4.6",
   "bin": "index.js",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "repository": "https://github.com/naoufal/react-native-payments/tree/master/packages/react-native-payments-cli",
+  "repository": "https://github.com/TheColvinCo/react-native-payments/tree/master/packages/react-native-payments-cli",
   "keywords": [
     "react-native-payments",
     "cli"
@@ -22,8 +22,8 @@
     "xcode": "^0.9.3"
   },
   "devDependencies": {
-    "@thecolvinco/react-native-payments": "^0.1.2",
     "react-native-payments-addon-braintree": "4.8.4",
-    "react-native-payments-addon-stripe": "11.1.0"
+    "react-native-payments-addon-stripe": "11.1.0",
+    "thecolvinco_react-native-payments": "^0.1.2"
   }
 }
