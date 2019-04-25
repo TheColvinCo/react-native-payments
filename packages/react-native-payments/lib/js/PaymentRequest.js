@@ -38,7 +38,7 @@ import {
   getSelectedShippingOption,
   hasGatewayConfig,
   getGatewayName,
-  validateGateway
+  validateGateway,
 } from './helpers';
 
 import { ConstructorError, GatewayError } from './errors';
@@ -53,12 +53,12 @@ import {
   USER_DISMISS_EVENT,
   USER_ACCEPT_EVENT,
   GATEWAY_ERROR_EVENT,
-  SUPPORTED_METHOD_NAME
+  SUPPORTED_METHOD_NAME,
 } from './constants';
 
 const noop = () => {};
 const IS_ANDROID = Platform.OS === 'android';
-const IS_IOS = Platform.OS === 'ios'
+const IS_IOS = Platform.OS === 'ios';
 
 // function processPaymentDetailsModifiers(details, serializedModifierData) {
 //     let modifiers = [];
@@ -124,7 +124,7 @@ export default class PaymentRequest {
   constructor(
     methodData: Array<PaymentMethodData> = [],
     details?: PaymentDetailsInit = [],
-    options?: PaymentOptions = {}
+    options?: PaymentOptions = {},
   ) {
     // 1. If the current settings object's responsible document is not allowed to use the feature indicated by attribute name allowpaymentrequest, then throw a " SecurityError" DOMException.
     noop();
@@ -153,7 +153,9 @@ export default class PaymentRequest {
     validateShippingOptions(details, ConstructorError);
 
     if (IS_IOS) {
-      selectedShippingOption = getSelectedShippingOption(details.shippingOptions);
+      selectedShippingOption = getSelectedShippingOption(
+        details.shippingOptions,
+      );
     }
 
     // 9. Let serializedModifierData be an empty list.
@@ -193,9 +195,8 @@ export default class PaymentRequest {
     // 19. Set the value of the shippingAddress attribute on request to null.
     this._shippingAddress = null;
     // 20. If options.requestShipping is set to true, then set the value of the shippingType attribute on request to options.shippingType. Otherwise, set it to null.
-    this._shippingType = IS_IOS && options.requestShipping === true
-      ? options.shippingType
-      : null;
+    this._shippingType =
+      IS_IOS && options.requestShipping === true ? options.shippingType : null;
 
     // React Native Payments specific 👇
     // ---------------------------------
@@ -214,14 +215,14 @@ export default class PaymentRequest {
     if (hasGatewayConfig(platformMethodData)) {
       validateGateway(
         getGatewayName(platformMethodData),
-        NativePayments.supportedGateways
+        NativePayments.supportedGateways,
       );
     }
 
     NativePayments.createPaymentRequest(
       platformMethodData,
       normalizedDetails,
-      options
+      options,
     );
   }
 
@@ -229,29 +230,29 @@ export default class PaymentRequest {
     // Internal Events
     this._userDismissSubscription = DeviceEventEmitter.addListener(
       USER_DISMISS_EVENT,
-      this._closePaymentRequest.bind(this)
+      this._closePaymentRequest.bind(this),
     );
     this._userAcceptSubscription = DeviceEventEmitter.addListener(
       USER_ACCEPT_EVENT,
-      this._handleUserAccept.bind(this)
+      this._handleUserAccept.bind(this),
     );
 
     if (IS_IOS) {
       this._gatewayErrorSubscription = DeviceEventEmitter.addListener(
         GATEWAY_ERROR_EVENT,
-        this._handleGatewayError.bind(this)
+        this._handleGatewayError.bind(this),
       );
 
       // https://www.w3.org/TR/payment-request/#onshippingoptionchange-attribute
       this._shippingOptionChangeSubscription = DeviceEventEmitter.addListener(
         INTERNAL_SHIPPING_OPTION_CHANGE_EVENT,
-        this._handleShippingOptionChange.bind(this)
+        this._handleShippingOptionChange.bind(this),
       );
 
       // https://www.w3.org/TR/payment-request/#onshippingaddresschange-attribute
       this._shippingAddressChangeSubscription = DeviceEventEmitter.addListener(
         INTERNAL_SHIPPING_ADDRESS_CHANGE_EVENT,
-        this._handleShippingAddressChange.bind(this)
+        this._handleShippingAddressChange.bind(this),
       );
     }
   }
@@ -261,7 +262,7 @@ export default class PaymentRequest {
 
     const event = new PaymentRequestUpdateEvent(
       SHIPPING_ADDRESS_CHANGE_EVENT,
-      this
+      this,
     );
     this._shippingAddressChangesCount++;
 
@@ -283,7 +284,7 @@ export default class PaymentRequest {
 
     const event = new PaymentRequestUpdateEvent(
       SHIPPING_OPTION_CHANGE_EVENT,
-      this
+      this,
     );
 
     this._shippingOptionChangeFn(event);
@@ -317,21 +318,21 @@ export default class PaymentRequest {
     paymentDescription: string,
     shippingAddress: Object,
   }) {
-    const {
-      googleTransactionId,
-      paymentDescription
-    } = details;
+    const { googleTransactionId, paymentDescription } = details;
 
     return {
       googleTransactionId,
       paymentDescription,
       // On Android, the recommended flow is to have user's confirm prior to
       // retrieving the full wallet.
-      getPaymentToken: () => NativePayments.getFullWalletAndroid(
-        googleTransactionId,
-        getPlatformMethodData(JSON.parse(this._serializedMethodData, Platform.OS)),
-        convertDetailAmountsToString(this._details)
-      )
+      getPaymentToken: () =>
+        NativePayments.getFullWalletAndroid(
+          googleTransactionId,
+          getPlatformMethodData(
+            JSON.parse(this._serializedMethodData, Platform.OS),
+          ),
+          convertDetailAmountsToString(this._details),
+        ),
     };
   }
 
@@ -354,14 +355,21 @@ export default class PaymentRequest {
     const paymentResponse = new PaymentResponse({
       requestId: this.id,
       methodName: IS_IOS ? 'apple-pay' : 'android-pay',
-      shippingAddress: this._options.requestShipping ? this._shippingAddress : null,
+      shippingAddress: this._options.requestShipping
+        ? this._shippingAddress
+        : null,
       details: this._getPlatformDetails(details),
       shippingOption: IS_IOS ? this._shippingOption : null,
-      payerName: this._options.requestPayerName ? this._shippingAddress.recipient : null,
-      payerPhone: this._options.requestPayerPhone ? this._shippingAddress.phone : null,
-      payerEmail: IS_ANDROID && this._options.requestPayerEmail
-        ? details.payerEmail
-        : null
+      payerName: this._options.requestPayerName
+        ? this._shippingAddress.recipient
+        : null,
+      payerPhone: this._options.requestPayerPhone
+        ? this._shippingAddress.phone
+        : null,
+      payerEmail:
+        IS_ANDROID && this._options.requestPayerEmail
+          ? details.payerEmail
+          : null,
     });
 
     return this._acceptPromiseResolver(paymentResponse);
@@ -387,10 +395,10 @@ export default class PaymentRequest {
 
     if (IS_IOS) {
       DeviceEventEmitter.removeSubscription(
-        this._shippingAddressChangeSubscription
+        this._shippingAddressChangeSubscription,
       );
       DeviceEventEmitter.removeSubscription(
-        this._shippingOptionChangeSubscription
+        this._shippingOptionChangeSubscription,
       );
     }
   }
@@ -399,7 +407,7 @@ export default class PaymentRequest {
   // https://www.w3.org/TR/payment-request/#onshippingoptionchange-attribute
   addEventListener(
     eventName: 'shippingaddresschange' | 'shippingoptionchange',
-    fn: e => Promise<any>
+    fn: e => Promise<any>,
   ) {
     if (eventName === SHIPPING_ADDRESS_CHANGE_EVENT) {
       return (this._shippingAddressChangeFn = fn.bind(this));
@@ -427,6 +435,15 @@ export default class PaymentRequest {
 
   // https://www.w3.org/TR/payment-request/#show-method
   show(): Promise<PaymentResponseType> {
+    const platformMethodData = getPlatformMethodData(
+      JSON.parse(this._serializedMethodData),
+      Platform.OS,
+    );
+    const normalizedDetails = convertDetailAmountsToString(this._details);
+    if (IS_ANDROID) {
+      return NativePayments.show(platformMethodData, normalizedDetails);
+    }
+
     this._acceptPromise = new Promise((resolve, reject) => {
       this._acceptPromiseResolver = resolve;
       this._acceptPromiseRejecter = reject;
@@ -436,13 +453,14 @@ export default class PaymentRequest {
 
       this._state = 'interactive';
 
-
       // These arguments are passed because on Android we don't call createPaymentRequest.
-      const platformMethodData = getPlatformMethodData(JSON.parse(this._serializedMethodData), Platform.OS);
-      const normalizedDetails = convertDetailAmountsToString(this._details);
       const options = this._options;
 
-      return NativePayments.show(platformMethodData, normalizedDetails, options);
+      return NativePayments.show(
+        platformMethodData,
+        normalizedDetails,
+        options,
+      );
     });
 
     return this._acceptPromise;
@@ -473,8 +491,10 @@ export default class PaymentRequest {
   // https://www.w3.org/TR/payment-request/#canmakepayment-method
   canMakePayments(): Promise<boolean> {
     return NativePayments.canMakePayments(
-      getPlatformMethodData(JSON.parse(this._serializedMethodData), Platform.OS)
+      getPlatformMethodData(
+        JSON.parse(this._serializedMethodData),
+        Platform.OS,
+      ),
     );
   }
 }
-

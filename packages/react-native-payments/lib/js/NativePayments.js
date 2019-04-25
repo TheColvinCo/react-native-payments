@@ -15,24 +15,19 @@ const NativePayments: {
   show: () => Promise<any>,
   abort: () => Promise<any>,
   complete: PaymentComplete => Promise<any>,
-  getFullWalletAndroid: string => Promise<any>
+  getFullWalletAndroid: string => Promise<any>,
 } = {
   supportedGateways: IS_ANDROID
     ? ['stripe', 'braintree'] // On Android, Payment Gateways are supported out of the gate.
-    : ReactNativePayments ? ReactNativePayments.supportedGateways : [],
+    : ReactNativePayments
+    ? ReactNativePayments.supportedGateways
+    : [],
 
   canMakePayments(methodData: object) {
+    if (IS_ANDROID) {
+      return ReactNativePayments.checkGPayIsEnable(methodData);
+    }
     return new Promise((resolve, reject) => {
-      if (IS_ANDROID) {
-        ReactNativePayments.canMakePayments(
-          methodData,
-          (err) => reject(err),
-          (canMakePayments) => resolve(true)
-        );
-
-        return;
-      }
-
       // On iOS, canMakePayments is exposed as a constant.
       resolve(ReactNativePayments.canMakePayments);
     });
@@ -55,7 +50,7 @@ const NativePayments: {
           if (err) return reject(err);
 
           resolve();
-        }
+        },
       );
     });
   },
@@ -80,25 +75,27 @@ const NativePayments: {
   },
 
   show(methodData, details, options = {}) {
+    if (IS_ANDROID) {
+      return ReactNativePayments.show(methodData, details);
+    }
+
     return new Promise((resolve, reject) => {
-      if (IS_ANDROID) {
-        ReactNativePayments.show(
-          methodData,
-          details,
-          options,
-          (err) => reject(err),
-          (...args) => { console.log(args); resolve(true) }
-        );
-
-        return;
-      }
-
       ReactNativePayments.show((err, paymentToken) => {
         if (err) return reject(err);
 
         resolve(true);
       });
     });
+  },
+
+  checkIfGPayIsEnable(methodData) {
+    if (!IS_ANDROID) {
+      reject(new Error('This method is only available on Android.'));
+
+      return;
+    }
+
+    return ReactNativePayments.checkGPayIsEnable(methodData);
   },
 
   abort() {
@@ -135,7 +132,11 @@ const NativePayments: {
     });
   },
 
-  getFullWalletAndroid(googleTransactionId: string, paymentMethodData: object, details: object): Promise<string> {
+  getFullWalletAndroid(
+    googleTransactionId: string,
+    paymentMethodData: object,
+    details: object,
+  ): Promise<string> {
     return new Promise((resolve, reject) => {
       if (!IS_ANDROID) {
         reject(new Error('This method is only available on Android.'));
@@ -147,17 +148,18 @@ const NativePayments: {
         googleTransactionId,
         paymentMethodData,
         details,
-        (err) => reject(err),
-        (serializedPaymentToken) => resolve({
-          serializedPaymentToken,
-          paymentToken: JSON.parse(serializedPaymentToken),
-          /** Leave previous typo in order not to create a breaking change **/
-          serializedPaymenToken: serializedPaymentToken,
-          paymenToken: JSON.parse(serializedPaymentToken)
-        })
+        err => reject(err),
+        serializedPaymentToken =>
+          resolve({
+            serializedPaymentToken,
+            paymentToken: JSON.parse(serializedPaymentToken),
+            /** Leave previous typo in order not to create a breaking change **/
+            serializedPaymenToken: serializedPaymentToken,
+            paymenToken: JSON.parse(serializedPaymentToken),
+          }),
       );
     });
-  }
+  },
 };
 
 export default NativePayments;
