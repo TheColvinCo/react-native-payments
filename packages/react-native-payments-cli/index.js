@@ -30,7 +30,7 @@ function convertAddOnToPackageName(addon = '') {
 }
 
 function getRNPProjectPath() {
-  return path.resolve(__dirname, '../@thecolvinco/react-native-payments/lib/ios/ReactNativePayments.xcodeproj/project.pbxproj');
+  return path.resolve(__dirname, '../../@thecolvinco/react-native-payments/lib/ios/ReactNativePayments.xcodeproj/project.pbxproj');
 }
 
 function getUserProjectPath(relativeIOSPath) {
