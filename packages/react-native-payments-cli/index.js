@@ -34,7 +34,7 @@ function getRNPProjectPath() {
 }
 
 function getUserProjectPath(relativeIOSPath) {
-  const iosPath = path.resolve(__dirname, `../../${relativeIOSPath}`)
+  const iosPath = path.resolve(__dirname, `../../../${relativeIOSPath}`)
   let userProjectPath;
   if (fs.existsSync(iosPath)) {
     const projectFileName = fs.readdirSync(`${iosPath}`).find(
