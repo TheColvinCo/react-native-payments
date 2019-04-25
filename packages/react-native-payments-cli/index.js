@@ -12,7 +12,7 @@ const { log } = console;
 const { setupAddon } = require('./lib/commands');
 
 const cli = meow(`
-    Usage: react-native-payments [command] <options>
+    Usage: @thecolvinco/react-native-payments [command] <options>
 
     Commands:
 
@@ -30,7 +30,7 @@ function convertAddOnToPackageName(addon = '') {
 }
 
 function getRNPProjectPath() {
-  return path.resolve(__dirname, '../react-native-payments/lib/ios/ReactNativePayments.xcodeproj/project.pbxproj');
+  return path.resolve(__dirname, '../@thecolvinco/react-native-payments/lib/ios/ReactNativePayments.xcodeproj/project.pbxproj');
 }
 
 function getUserProjectPath(relativeIOSPath) {
@@ -144,7 +144,7 @@ function link(addon) {
   }
 
   // Check if `react-native-payments` is installed
-  if (!isPackageInstalled('react-native-payments')) {
+  if (!isPackageInstalled('@thecolvinco/react-native-payments')) {
     return;
   };
 
