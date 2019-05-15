@@ -1,6 +1,6 @@
 {
   "name": "thecolvinco_react-native-payments-cli",
-  "version": "0.4.6",
+  "version": "0.4.7",
   "bin": "index.js",
   "main": "index.js",
   "scripts": {

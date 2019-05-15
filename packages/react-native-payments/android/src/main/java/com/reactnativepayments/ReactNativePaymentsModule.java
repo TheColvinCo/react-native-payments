@@ -120,7 +120,8 @@ public class ReactNativePaymentsModule extends ReactContextBaseJavaModule {
    */
   private static JSONArray getAllowedCardAuthMethods() {
     return new JSONArray()
-            .put("PAN_ONLY");
+        .put("PAN_ONLY")
+        .put("CRYPTOGRAM_3DS");
   }
 
   /**
